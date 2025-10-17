@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+
+# Environment
+.env
+sample.env
+
+# Data
+/data/*.db
+
+# macOS
+.DS_Store
+
+# Jupyter/Streamlit
+notebooks/.ipynb_checkpoints/
+notebooks/.streamlit/

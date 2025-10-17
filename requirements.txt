@@ -1,0 +1,8 @@
+openai==1.13.3
+semantic-kernel==0.8.10.dev0
+streamlit==1.35.0
+requests==2.31.0
+python-dotenv==1.0.1
+sqlite-utils==3.36
+pandas==2.2.2
+numpy==1.26.4
