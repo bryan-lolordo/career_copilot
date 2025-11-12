@@ -1,24 +1,28 @@
 # 🚀 Career Copilot - Agentic AI Job Search Assistant
 
+**[📺 View Live Demo on LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7389604326559817728/)**
+
 An intelligent agentic AI system powered by **Microsoft Semantic Kernel** and **Azure OpenAI** that autonomously helps users find jobs, match resumes to opportunities, and manage job searches through natural language conversations and automated tool orchestration.
 
-## 📺 Demo & LinkedIn
+## 🎯 What is Career Copilot?
 
-See a live demo and project overview on LinkedIn:
-[Career Copilot Demo & Walkthrough](https://www.linkedin.com/feed/update/urn:li:activity:7389604326559817728/)
+Career Copilot is an **agentic AI system** that demonstrates production-ready patterns for autonomous AI applications. The system uses natural language to understand intent, automatically selects appropriate tools, and maintains conversation context across multi-turn dialogues.
 
-## 🎯 Project Overview
+**Key Technologies:**
+- 🤖 Microsoft Semantic Kernel for AI orchestration
+- 🧠 Azure OpenAI (GPT-4) for language understanding
+- 🎨 Streamlit for web interface
+- 🔍 SerpAPI for job search data
 
-Career Copilot is a multi-agent AI system demonstrating advanced agentic AI patterns including:
+## 💡 Why This Project?
 
-- **Autonomous function calling** with Microsoft Semantic Kernel
-- **Multi-turn conversational memory** with context awareness
-- **Self-improving AI** that critiques and refines its own outputs
-- **Plugin-based architecture** for modular tool integration
-- **Natural language to SQL** query generation
-- **Hybrid UI** (conversational + traditional web interface)
+This project demonstrates **production-ready agentic AI patterns**:
 
-This project showcases production-ready patterns for building agentic AI applications that can autonomously plan, execute, and refine complex workflows.
+✅ **Autonomous Decision Making** - AI selects tools without hardcoded commands  
+✅ **Multi-Turn Context** - Maintains conversation state across interactions  
+✅ **Self-Improvement** - AI critiques and refines its own outputs  
+✅ **Safe Code Generation** - Natural language to SQL with injection prevention  
+✅ **Plugin Architecture** - Modular, extensible design  
 
 ---
 
@@ -35,9 +39,13 @@ The system uses **Microsoft Semantic Kernel** as the orchestration framework, en
 5. **Self-improve** by critiquing and refining its own outputs
 
 ### Plugin Ecosystem
-
 ```
 ┌─────────────────────────────────────────────────┐
+│          Azure OpenAI (GPT-4)                   │
+│          Semantic Kernel Agent                  │
+└───────────────┬─────────────────────────────────┘
+                │
+                ├─> JobPlugin (SerpAPI integration)
                 ├─> ResumeMatchingPlugin (AI scoring)
                 ├─> QueryDatabasePlugin (NL to SQL)
                 ├─> ResumeTailoringPlugin (Content optimization)
@@ -156,85 +164,7 @@ This demonstrates meta-learning: the AI learns from its own mistakes within a si
 
 ---
 
-## 🛠️ Technical Stack
-
-### AI/ML Layer
-```
-├─ Microsoft Semantic Kernel (agent orchestration)
-├─ Azure OpenAI Service (GPT-4)
-│  ├─ Chat completion with function calling
-│  ├─ Few-shot prompting for structured outputs
-│  └─ Token management & optimization
-├─ Prompt Engineering
-│  ├─ System prompts with role definition
-│  ├─ Few-shot examples for consistency
-│  └─ Chain-of-thought reasoning
-└─ Vector similarity (planned feature)
-```
-
-### Backend
-```
-├─ Python 3.8+
-├─ SQLite (job & resume database)
-├─ SerpAPI (job search provider)
-├─ pdfplumber & docx2txt (document parsing)
-└─ asyncio (async plugin execution)
-```
-
-### Frontend
-```
-├─ Streamlit (multi-page web app)
-├─ Custom HTML/CSS components
-└─ Real-time UI updates
-```
-
----
-
-## 📁 Project Structure
-
-```
-career_copilot/
-├── agents/
-│   ├── plugins/                         # Semantic Kernel plugins
-│   │   ├── JobPlugin.py                 # Job search & management
-│   │   ├── ResumeMatchingPlugin.py      # AI-powered matching
-│   │   ├── QueryDatabasePlugin.py       # NL to SQL
-│   │   ├── ResumeTailoringPlugin.py     # Resume optimization
-│   │   ├── SelfImprovingMatchPlugin.py  # Self-critique loops
-│   │   ├── ResumePreprocessorPlugin.py  # Resume text processing
-│   │   └── JobPreprocessorPlugin.py     # Job data cleaning
-│   └── semantic_kernel_setup.py         # Kernel configuration & CLI
-│
-├── services/
-│   ├── chatbot.py                       # Main agent orchestration
-│   ├── conversation_memory.py           # Conversation state management
-│   ├── database_service.py              # Data access layer
-│   ├── db.py                           # SQLite operations
-│   ├── job_api.py                      # SerpAPI integration
-│   └── resume_parser.py                # Document parsing
-│
-├── pages/                               # Streamlit multi-page UI
-│   ├── 1_💬_Chatbot.py
-│   ├── 2_📄_Resume_Manager.py
-│   ├── 3_🔍_Job_Search.py
-│   ├── 4_💾_Saved_Jobs.py
-│   ├── 5_🎯_Resume_Matching.py
-│   ├── 6_🔬_Match_Analysis.py
-│   └── 7_✏️_Resume_Tailoring.py
-│
-├── ui/                                  # Reusable UI components
-│   ├── components.py
-│   └── utils.py
-│
-├── streamlit_app.py                     # Web app entry point
-├── ARCHITECTURE.md                      # Detailed architecture docs
-├── requirements.txt
-└── .env                                 # API keys (not in repo)
-```
-
----
-
-## 🚀 Getting Started
+## 🛠️ Installation & Setup
 
 ### Prerequisites
 ```bash
@@ -243,7 +173,7 @@ Azure OpenAI API access
 SerpAPI key (for job search)
 ```
 
-### Installation
+### Quick Start
 
 1. **Clone the repository**
 ```bash
@@ -272,18 +202,12 @@ cp .env.example .env
 # - SERPAPI_KEY
 ```
 
-### Usage
-
-**Option 1: Web Interface (Recommended)**
+5. **Run the application**
 ```bash
 streamlit run streamlit_app.py
 ```
-Navigate to `http://localhost:8501`
 
-**Option 2: CLI Chatbot**
-```bash
-python -m agents.semantic_kernel_setup
-```
+Navigate to `http://localhost:8501`
 
 ---
 
@@ -305,11 +229,11 @@ AI: [saves selected jobs to database] ✅ Saved 3 jobs to your database
 ```
 User: match my resume
 AI: 📄 Available resumes:
-    1. Bryan LoLordo - AI Engineer
+    1. AI Engineer Resume
     Which resume would you like to match?
 
 User: the first one
-AI: ✅ Selected "Bryan LoLordo - AI Engineer"
+AI: ✅ Selected "AI Engineer Resume"
     How would you like to filter jobs?
     - All jobs in database (23 jobs)
     - Only unmatched jobs (15 jobs)
@@ -387,56 +311,84 @@ When the agent can't fulfill a request, it explains why and offers alternatives 
 
 ---
 
-## 🔬 Advanced Features
+## 🛠️ Technical Stack
 
-### Conversation Memory System
-
-```python
-@dataclass
-class ConversationContext:
-    # Active references
-    active_resume_id: Optional[int]
-    active_job_id: Optional[int]
-    
-    # Recent results
-    last_search_results: Optional[List[Dict]]
-    last_match_results: Optional[List[Dict]]
-    
-    # Multi-step workflow state
-    awaiting_resume_selection: bool
-    awaiting_job_filter_selection: bool
-    selected_resume_for_matching: Optional[Dict]
-    
-    # Learned preferences
-    preferred_locations: List[str]
-    preferred_job_types: List[str]
+### AI/ML Layer
+```
+├─ Microsoft Semantic Kernel (agent orchestration)
+├─ Azure OpenAI Service (GPT-4)
+│  ├─ Chat completion with function calling
+│  ├─ Few-shot prompting for structured outputs
+│  └─ Token management & optimization
+├─ Prompt Engineering
+│  ├─ System prompts with role definition
+│  ├─ Few-shot examples for consistency
+│  └─ Chain-of-thought reasoning
+└─ Vector similarity (planned feature)
 ```
 
-This enables truly conversational interactions where the AI remembers what "it" and "that job" refer to.
-
-### Plugin Architecture
-
-Each plugin follows the pattern:
-```python
-class MyPlugin:
-    @kernel_function(
-        name="function_name",
-        description="Natural language description of what this does"
-    )
-    async def my_function(
-        self,
-        param: Annotated[str, "Description for the AI"]
-    ) -> Annotated[str, "Description of return value"]:
-        # Implementation
-        return result
+### Backend
+```
+├─ Python 3.8+
+├─ SQLite (job & resume database)
+├─ SerpAPI (job search provider)
+├─ pdfplumber & docx2txt (document parsing)
+└─ asyncio (async plugin execution)
 ```
 
-The AI agent reads these descriptions to understand what tools are available and when to use them.
+### Frontend
+```
+├─ Streamlit (multi-page web app)
+├─ Custom HTML/CSS components
+└─ Real-time UI updates
+```
+
+---
+
+## 📁 Project Structure
+```
+career_copilot/
+├── agents/
+│   ├── plugins/                         # Semantic Kernel plugins
+│   │   ├── JobPlugin.py                 # Job search & management
+│   │   ├── ResumeMatchingPlugin.py      # AI-powered matching
+│   │   ├── QueryDatabasePlugin.py       # NL to SQL
+│   │   ├── ResumeTailoringPlugin.py     # Resume optimization
+│   │   ├── SelfImprovingMatchPlugin.py  # Self-critique loops
+│   │   ├── ResumePreprocessorPlugin.py  # Resume text processing
+│   │   └── JobPreprocessorPlugin.py     # Job data cleaning
+│   └── semantic_kernel_setup.py         # Kernel configuration & CLI
+│
+├── services/
+│   ├── chatbot.py                       # Main agent orchestration
+│   ├── conversation_memory.py           # Conversation state management
+│   ├── database_service.py              # Data access layer
+│   ├── db.py                           # SQLite operations
+│   ├── job_api.py                      # SerpAPI integration
+│   └── resume_parser.py                # Document parsing
+│
+├── pages/                               # Streamlit multi-page UI
+│   ├── 1_💬_Chatbot.py
+│   ├── 2_📄_Resume_Manager.py
+│   ├── 3_🔍_Job_Search.py
+│   ├── 4_💾_Saved_Jobs.py
+│   ├── 5_🎯_Resume_Matching.py
+│   ├── 6_🔬_Match_Analysis.py
+│   └── 7_✏️_Resume_Tailoring.py
+│
+├── ui/                                  # Reusable UI components
+│   ├── components.py
+│   └── utils.py
+│
+├── streamlit_app.py                     # Web app entry point
+├── ARCHITECTURE.md                      # Detailed architecture docs
+├── README.md
+└── requirements.txt
+```
 
 ---
 
 ## 📊 Database Schema
-
 ```sql
 -- Resumes
 CREATE TABLE resumes (
@@ -478,27 +430,6 @@ CREATE TABLE resume_matches (
 
 ---
 
-## 🧪 Testing & Development
-
-### Run Tests
-```bash
-python -m pytest tests/
-```
-
-### Debug Mode
-```bash
-# Enable detailed logging
-export LOG_LEVEL=DEBUG
-streamlit run streamlit_app.py
-```
-
-### Database Migration
-```bash
-python tests/migrate_db.py
-```
-
----
-
 ## 🔐 Security Considerations
 
 1. **SQL Injection Prevention**: All database queries are validated before execution
@@ -509,15 +440,16 @@ python tests/migrate_db.py
 
 ---
 
-## 🚧 Future Enhancements
+## 🚧 Roadmap
 
-- [ ] **Vector embeddings** for semantic job search
-- [ ] **RAG (Retrieval-Augmented Generation)** for resume writing assistance
-- [ ] **Multi-agent collaboration** (separate agents for search, analysis, writing)
-- [ ] **Streaming responses** for real-time feedback
-- [ ] **Cover letter generation** tailored to job descriptions
-- [ ] **Interview preparation** based on job requirements
-- [ ] **Salary negotiation** guidance using market data
+**Planned Features:**
+- Vector embeddings for semantic job search
+- RAG (Retrieval-Augmented Generation) for resume writing assistance
+- Multi-agent collaboration (separate agents for search, analysis, writing)
+- Streaming responses for real-time feedback
+- Cover letter generation tailored to job descriptions
+- Interview preparation based on job requirements
+- Salary negotiation guidance using market data
 
 ---
 
@@ -551,7 +483,7 @@ Topics covered:
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details
+MIT License
 
 ---
 
@@ -565,4 +497,4 @@ MIT License - see [LICENSE](LICENSE) file for details
 
 **Built with ❤️ using Agentic AI patterns**
 
-*Demonstrating enterprise-grade AI agent development for technical interviews* 🎯
+*Demonstrating enterprise-grade AI agent development* 🎯
