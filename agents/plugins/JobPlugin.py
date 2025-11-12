@@ -1,0 +1,230 @@
+# agents/plugins/JobPlugin.py
+import logging
+import json
+from semantic_kernel.functions import kernel_function
+from typing import Annotated
+from services.job_api import search_jobs
+from services.db import save_jobs
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logger = logging.getLogger(__name__)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter("\033[96m[CareerCopilot Plugin] %(message)s\033[0m")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+
+class JobPlugin:
+    """
+    Plugin to search for jobs using external APIs and save them to the database.
+    """
+    
+    def __init__(self, context=None):
+        """
+        Initialize the JobPlugin with optional shared conversation context.
+        Args:
+            context: Shared ConversationContext instance for memory.
+        """
+        self.context = context
+
+    @kernel_function(
+        name="find_jobs",
+        description=(
+            "Searches for NEW job postings from external job boards. "
+            "Use this when the user wants to SEARCH or FIND NEW jobs: "
+            "'search for jobs', 'find me Python developer positions', 'look for new opportunities'. "
+            "DO NOT use this to query already saved jobs - use query_database_with_ai for that."
+        )
+    )
+    async def find_jobs(
+        self,
+        query: Annotated[str, "The job title or keywords to search for (e.g., 'Software Engineer', 'Data Scientist')"],
+        location: Annotated[str, "The location to search in (e.g., 'Chicago, IL', 'Remote')"] = "Chicago, IL",
+        num_results: Annotated[int, "Number of job results to return (default 5)"] = 5
+    ) -> Annotated[str, "JSON string containing job search results"]:
+        """
+        Search for jobs and store in context for exploration and later saving.
+        """
+
+        logger.info(f"Searching for jobs: query='{query}', location='{location}', num_results={num_results}")
+
+        try:
+            # Fetch jobs from API
+            jobs = search_jobs(query, location, num_results)
+            logger.info(f"Retrieved {len(jobs)} job(s) for '{query}' in {location}")
+
+            if not jobs:
+                return json.dumps({
+                    "summary": f"No jobs found for '{query}' in {location}. Try different keywords or location.",
+                    "jobs": []
+                })
+
+            # Store jobs in context for later reference and saving
+            if self.context:
+                self.context.last_searched_jobs = jobs
+                self.context.last_search_query = query
+                self.context.last_search_location = location
+                self.context.last_action = "found_jobs"
+
+            # Build summary
+            job_summaries = []
+            for i, job in enumerate(jobs, start=1):
+                job_summaries.append(
+                    f"{i}. {job.get('title', 'Unknown Title')} at {job.get('company', 'Unknown Company')} ({job.get('location', 'Unknown Location')})"
+                )
+
+            summary_text = "\n".join(job_summaries)
+
+            return json.dumps({
+                "summary": f"Found {len(jobs)} '{query}' jobs in {location}:\n{summary_text}",
+                "jobs": jobs
+            })
+
+        except Exception as e:
+            logger.error(f"Error in JobPlugin.find_jobs: {e}", exc_info=True)
+            return json.dumps({
+                "summary": f"❌ Job search failed: {str(e)}. Please try again or contact support.",
+                "jobs": []
+            })
+
+    @kernel_function(
+        name="get_job_details",
+        description=(
+            "Get detailed information about a specific job from the last search results. "
+            "Use when user asks: 'tell me about job #2', 'what's the description for the first one', 'more details on job 3'"
+        )
+    )
+    async def get_job_details(
+        self,
+        job_number: Annotated[int, "The job number from the search results (1-indexed)"]
+    ) -> Annotated[str, "Detailed job information"]:
+        """
+        Retrieve details for a specific job from the last search.
+        """
+        if not self.context or not hasattr(self.context, 'last_searched_jobs'):
+            return "❌ No recent job search found. Please search for jobs first."
+        
+        jobs = self.context.last_searched_jobs
+        
+        if job_number < 1 or job_number > len(jobs):
+            return f"❌ Invalid job number. Please choose between 1 and {len(jobs)}."
+        
+        job = jobs[job_number - 1]
+        
+        # Store this job as the active one
+        if hasattr(self.context, 'active_job_index'):
+            self.context.active_job_index = job_number - 1
+        
+        details = f"**{job.get('title', 'Unknown Title')}** at **{job.get('company', 'Unknown Company')}**\n\n"
+        details += f"📍 **Location:** {job.get('location', 'Unknown')}\n"
+        details += f"🔗 **Apply:** {job.get('link', 'No link available')}\n\n"
+        details += f"**Description:**\n{job.get('description', 'No description available')}"
+        
+        return details
+
+    @kernel_function(
+        name="save_searched_jobs",
+        description=(
+            "Saves jobs from the last search to the database. "
+            "Use when user says: 'save all', 'save these jobs', 'save jobs 1,3,5', 'save the jobs'"
+        )
+    )
+    async def save_searched_jobs(
+        self,
+        job_numbers: Annotated[str, "Comma-separated job numbers to save (e.g., '1,3,5') or 'all' to save everything"] = "all"
+    ) -> Annotated[str, "Confirmation of saved jobs"]:
+        """
+        Save specific jobs or all jobs from the last search.
+        """
+        if not self.context or not hasattr(self.context, 'last_searched_jobs'):
+            return "❌ No recent job search found. Please search for jobs first."
+        
+        jobs = self.context.last_searched_jobs
+        query = getattr(self.context, 'last_search_query', '')
+        location = getattr(self.context, 'last_search_location', '')
+        
+        # Determine which jobs to save
+        if job_numbers.lower() == "all":
+            jobs_to_save = jobs
+            job_indices = list(range(1, len(jobs) + 1))
+        else:
+            try:
+                indices = [int(n.strip()) for n in job_numbers.split(',')]
+                jobs_to_save = [jobs[i-1] for i in indices if 1 <= i <= len(jobs)]
+                job_indices = [i for i in indices if 1 <= i <= len(jobs)]
+                
+                if not jobs_to_save:
+                    return f"❌ Invalid job numbers. Please choose from 1-{len(jobs)}."
+            except (ValueError, IndexError) as e:
+                return f"❌ Error parsing job numbers: {str(e)}. Use format: '1,3,5' or 'all'"
+        
+        # Save to database
+        save_jobs(jobs_to_save, query, location)
+        
+        logger.info(f"Saved {len(jobs_to_save)} jobs to database")
+        
+        if job_numbers.lower() == "all":
+            return f"✅ Saved all {len(jobs_to_save)} '{query}' jobs in {location}."
+        else:
+            return f"✅ Saved {len(jobs_to_save)} selected job(s): #{', #'.join(map(str, job_indices))}."
+
+    @kernel_function(
+        name="get_saved_jobs",
+        description="Retrieves all jobs that have been saved to the database from previous searches"
+    )
+    async def get_saved_jobs(
+        self,
+        limit: Annotated[int, "Maximum number of jobs to return (default 10)"] = 10
+    ) -> Annotated[str, "JSON string containing saved jobs"]:
+        """
+        Retrieve saved jobs from the database.
+        """
+        try:
+            import sqlite3
+            from services.db import DB_PATH
+            
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT id, title, company, location, link, description
+                FROM jobs
+                ORDER BY id DESC
+                LIMIT ?
+            """, (limit,))
+            
+            rows = cursor.fetchall()
+            conn.close()
+            
+            if not rows:
+                return json.dumps({
+                    "summary": "No saved jobs found in the database.",
+                    "jobs": []
+                })
+            
+            jobs = []
+            for row in rows:
+                jobs.append({
+                    "id": row[0],
+                    "title": row[1],
+                    "company": row[2],
+                    "location": row[3],
+                    "link": row[4],
+                    "description": row[5][:200] + "..." if row[5] and len(row[5]) > 200 else row[5]
+                })
+            
+            return json.dumps({
+                "summary": f"Found {len(jobs)} saved jobs in the database.",
+                "jobs": jobs
+            })
+            
+        except Exception as e:
+            logger.error(f"Error retrieving saved jobs: {e}", exc_info=True)
+            return json.dumps({
+                "summary": f"❌ Error retrieving saved jobs: {str(e)}",
+                "jobs": []
+            })

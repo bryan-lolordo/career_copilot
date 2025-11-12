@@ -18,3 +18,25 @@ sample.env
 # Jupyter/Streamlit
 notebooks/.ipynb_checkpoints/
 notebooks/.streamlit/
+
+# Python
+*.pyc
+__pycache__/
+.venv/
+.env
+
+# Data and personal files
+data/
+documents/
+pics/
+tests/
+
+# Notes and personal markdowns
+AGENTIC_FEATURES_REFERENCE.md
+AGENTIC_LEVEL.md
+INTERVIEW_CHEAT_SHEET.md
+TECHNICAL_OVERVIEW.md
+
+# OS files
+.DS_Store
+Thumbs.db
